@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func LogRequest(req *http.Request) {
-	log.Printf("%s %s %s %d\n", req.Method, req.URL, req.Proto, http.StatusOK)
+func LogRequest(req *http.Request, status int) {
+	log.Printf("%s %s %s %d\n", req.Method, req.URL, req.Proto, status)
 }
