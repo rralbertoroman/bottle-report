@@ -1,16 +1,20 @@
 package messaging
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/rralbertoroman/bottle-report/middleware"
 )
 
-func helloHandler(w http.ResponseWriter, req *http.Request){
-	io.WriteString(w, "Hello world \n")
+func MessageHandler(w http.ResponseWriter, req *http.Request){
+	switch req.Method {
+	case http.MethodPost:
+		SaveMessage(req.Body)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
 }
 
 func InitRoutes() {
-	http.HandleFunc("/hello", middleware.WithLogging(helloHandler))
+	http.HandleFunc("/messages", middleware.WithLogging(MessageHandler))
 }
