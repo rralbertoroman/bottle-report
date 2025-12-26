@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/rralbertoroman/bottle-report/utils"
+	"github.com/rralbertoroman/bottle-report/internal/utils"
 )
 
 func WithLogging(next func(w http.ResponseWriter, r *http.Request ) (status int)) http.HandlerFunc {

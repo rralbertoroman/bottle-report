@@ -1,10 +1,16 @@
-package messaging
+package handlers
 
 import (
 	"encoding/json"
 	"io"
 	"log"
 )
+
+type Message struct {
+	ID     string `json:"id"`
+	Body   string `json:"body"`
+	Sender string `json:"sender_id"`
+}
 
 func SaveMessage(body io.ReadCloser){
 	var message Message
@@ -13,7 +19,6 @@ func SaveMessage(body io.ReadCloser){
 	
 	log.Printf("\n{ID: %s, Body: %s, Sender: %s}\n", message.ID, message.Body, message.Sender)
 }
-
 
 func AllMessages() []Message{
 	return []Message{
