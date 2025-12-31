@@ -4,16 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"time"
 
 	"github.com/rralbertoroman/bottle-report/internal/app"
 	"gorm.io/gorm"
 )
 
 type Message struct {
-	gorm.Model
-	ID     string `json:"id" gorm:"column:id;primarykey"`
-	Body   string `json:"body" gorm:"column:body"`
-	Sender string `json:"sender_id" gorm:"column:sender"`
+	ID        string         `json:"id" gorm:"column:id;primaryKey"`
+	Body      string         `json:"body" gorm:"column:body"`
+	Sender    string         `json:"sender_id" gorm:"column:sender"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"deleted_at,omitempty" gorm:"index"`
 }
 
 func SaveMessage(ctx context.Context,body io.ReadCloser, a *app.App) (err error){
