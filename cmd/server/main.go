@@ -16,7 +16,6 @@ func main() {
 	cfg := config.Load()
 
 	database := db.Open(cfg)
-	defer database.Close()
 
 	app := &app.App{
 		DB: database,

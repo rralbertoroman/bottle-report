@@ -1,34 +1,29 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/rralbertoroman/bottle-report/internal/config"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 
-func Open(cfg config.Config) (db *sql.DB){
-	dsn := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+func Open(cfg config.Config) (db *gorm.DB){
+	connectionString := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		cfg.DBHost,
 		cfg.DBUser,
 		cfg.DBPassword,
-		cfg.DBHost,
-		cfg.DBPort,
 		cfg.DBName,
+		cfg.DBPort,
 	)
-
-	db, err := 	sql.Open("pgx", dsn)
+	
+	db, err := 	gorm.Open(postgres.Open(connectionString), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	if err:= db.Ping(); err != nil{
-		log.Fatal(err)
-	}
-
 	return
 }

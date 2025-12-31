@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
@@ -9,8 +10,14 @@ import (
 )
 
 func Health(a *app.App) http.HandlerFunc {
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		if err := a.DB.PingContext(r.Context()); err != nil {
+		sqlDB, err := a.DB.DB()
+		if err != nil {
+			http.Error(w, "db unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		if err := sqlDB.Ping(); err != nil {
 			http.Error(w, "db unavailable", http.StatusServiceUnavailable)
 			return
 		}
@@ -19,13 +26,21 @@ func Health(a *app.App) http.HandlerFunc {
 }
 
 func MessagesHandler(a *app.App) http.HandlerFunc{
+	a.DB.AutoMigrate(&Message{})
+	ctx := context.Background()
+
 	return middleware.WithLogging(
 		func (w http.ResponseWriter, req *http.Request) (status int){
+			var err error
+			
 			switch req.Method {
 			case http.MethodPost:
-				SaveMessage(req.Body)
+				err = SaveMessage(ctx, req.Body, a)
+
 			case http.MethodGet:
-				messages := AllMessages()
+
+				var messages []Message
+				messages, err = AllMessages(ctx, a)
 
 				if len(messages) == 0 {
 					status = http.StatusNotFound
@@ -36,7 +51,13 @@ func MessagesHandler(a *app.App) http.HandlerFunc{
 				json.NewEncoder(w).Encode(messages)
 			default:
 				w.WriteHeader(http.StatusMethodNotAllowed)
-				status =  http.StatusMethodNotAllowed
+				status = http.StatusMethodNotAllowed
+				return
+			}
+
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(err.Error()))
 				return
 			}
 

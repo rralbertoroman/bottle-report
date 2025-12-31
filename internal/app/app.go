@@ -1,7 +1,7 @@
 package app
 
-import "database/sql"
+import "gorm.io/gorm"
 
 type App struct {
-	DB *sql.DB
+	DB *gorm.DB
 }

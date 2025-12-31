@@ -1,39 +1,32 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"io"
-	"log"
+
+	"github.com/rralbertoroman/bottle-report/internal/app"
+	"gorm.io/gorm"
 )
 
 type Message struct {
-	ID     string `json:"id"`
-	Body   string `json:"body"`
-	Sender string `json:"sender_id"`
+	gorm.Model
+	ID     string `json:"id" gorm:"column:id;primarykey"`
+	Body   string `json:"body" gorm:"column:body"`
+	Sender string `json:"sender_id" gorm:"column:sender"`
 }
 
-func SaveMessage(body io.ReadCloser){
+func SaveMessage(ctx context.Context,body io.ReadCloser, a *app.App) (err error){
 	var message Message
 
 	json.NewDecoder(body).Decode(&message)
-	
-	log.Printf("\n{ID: %s, Body: %s, Sender: %s}\n", message.ID, message.Body, message.Sender)
+
+	err = gorm.G[Message](a.DB).Create(ctx, &message)
+	return
 }
 
-func AllMessages() []Message{
-	return []Message{
-		{
-			ID: "123456",
-			Body: "De Barbosa a Ceguera 150 pesos",
-			Sender: "chuchi_lamora",
-		},{
-			ID: "122556",
-			Body: "Novia del Mediodía a Frank País 150",
-			Sender: "miguelTanquepoporeso",
-		},{
-			ID: "127856",
-			Body: "Frank País a Ceguera 150 CUP",
-			Sender: "marcos",
-		},
-	}
+func AllMessages(ctx context.Context, a *app.App) (messages []Message, err error){
+	result := a.DB.Find(&messages)
+	err = result.Error
+	return
 }
