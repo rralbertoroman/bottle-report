@@ -7,6 +7,7 @@ import (
 
 	"github.com/rralbertoroman/bottle-report/internal/app"
 	"github.com/rralbertoroman/bottle-report/internal/middleware"
+	"gorm.io/gorm"
 )
 
 func Health(a *app.App) http.HandlerFunc {
@@ -38,7 +39,6 @@ func MessagesHandler(a *app.App) http.HandlerFunc{
 				err = SaveMessage(ctx, req.Body, a)
 
 			case http.MethodGet:
-
 				var messages []Message
 				messages, err = AllMessages(ctx, a)
 
@@ -49,6 +49,23 @@ func MessagesHandler(a *app.App) http.HandlerFunc{
 				}
 
 				json.NewEncoder(w).Encode(messages)
+			case http.MethodDelete:
+				id := req.URL.Query().Get("id")
+				
+				if id == "" {
+					w.WriteHeader(http.StatusBadRequest)
+					status = http.StatusBadRequest
+					return
+				}
+
+				err = DeleteMessage(ctx, id, a)
+
+				if err == gorm.ErrRecordNotFound {
+					status = http.StatusNotFound
+					w.WriteHeader(status)
+					w.Write([]byte("Message not found"))
+					return
+				}
 			default:
 				w.WriteHeader(http.StatusMethodNotAllowed)
 				status = http.StatusMethodNotAllowed

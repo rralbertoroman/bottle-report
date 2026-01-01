@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"time"
 
 	"github.com/rralbertoroman/bottle-report/internal/app"
@@ -31,5 +32,22 @@ func SaveMessage(ctx context.Context,body io.ReadCloser, a *app.App) (err error)
 func AllMessages(ctx context.Context, a *app.App) (messages []Message, err error){
 	result := a.DB.Find(&messages)
 	err = result.Error
+	return
+}
+
+func DeleteMessage(ctx context.Context, id string, a *app.App) (err error){
+	var rows int
+	rows, err = gorm.G[Message](a.DB).Where("id = ?", id).Delete(ctx)
+
+	switch rows {
+	case 0:
+		log.Println("Message not found")
+		err = gorm.ErrRecordNotFound
+	case 1:
+		log.Printf("Message %s deleted successfully\n", id)
+	default:
+		log.Println("More than one row affected!")
+	}
+
 	return
 }
